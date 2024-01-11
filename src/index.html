@@ -4,8 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assistant</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&family=Roboto&display=swap" rel="stylesheet">
 </head>
 <body>
-    <main></main>
+    <main>
+        <section class="chatbot-container">
+            <div class="chatbot-header">
+                <div class="logo-container">
+                    <img src="../images/logo.svg" class="logo" alt="logo">
+                </div>
+                <p class="sub-heading">Knowledge Bank</p>
+            </div>
+            <div class="chatbot-conversation-container" id="chatbot-conversation-container">
+            </div>
+            <form id="form" class="chatbot-input-container">
+                <input name="user-input" type="text" id="user-input" required>
+                <button id="submit-btn" class="submit-btn">
+                    <div>
+                        <img
+                            src="../images/send.svg"   
+                            class="send-btn-icon"
+                            alt="send"
+                        >
+                    </div>
+                </button>
+            </form>
+        </section>
+    </main>
+    <script src="index.js" type="module"></script>
 </body>
 </html>
