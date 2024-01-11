@@ -1,9 +1,26 @@
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { PromptTemplate } from "langchain/prompts" 
+
 document.addEventListener('submit', (e) => {
   e.preventDefault();
+  /* eslint-disable-next-line */
   progressConversation();
 });
 
 const openAIApiKey = process.env.OPENAI_API_KEY;
+const llm = new ChatOpenAI({ openAIApiKey });
+
+const standAloneQuestionTemplate = 'Given a question, convert it into a standalone question.question: {question} standalone question:';
+
+const standAloneQuestionPrompt = PromptTemplate.fromTemplate(standAloneQuestionTemplate);
+
+const standAloneQuestionChain = standAloneQuestionPrompt.pipe(llm);
+
+const response = await standAloneQuestionChain.invoke({
+  question: 'What are the technical requirements for running scrimba? I have a very old laptop which is not that powerful.'
+})
+
+console.log(response)
 
 async function progressConversation() {
   const userInput = document.getElementById('user-input');
