@@ -1,14 +1,17 @@
-import _ from 'lodash';
-import './style.css';
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter"
 
-function component() {
-  const element = document.createElement('div');
+try {
+  const result = await fetch('../scrimba-info.txt')
+  const text = await result.text()
 
-  // Lodash, now imported by this script
-  element.innerHTML = _.join(['Hello', 'webpack'], ' ');
-  element.classList.add('hello');
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 500,
+    separators: ['\n\n', '\n', ' ', ''],
+    chunkOverlap: 50,
+  })
 
-  return element;
+  const output = await splitter.createDocuments([text])
+  console.log(output)
+} catch (error) {
+  console.log(error)
 }
-
-document.body.appendChild(component());
