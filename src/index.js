@@ -1,5 +1,7 @@
-import { ChatOpenAI } from "langchain/chat_models/openai";
+import { ChatOpenAI } from "langchain/chat_models/openai"
 import { PromptTemplate } from "langchain/prompts" 
+import { StringOutputParser } from "langchain/schema/output_parser"
+import { retriever } from "../utils/retriever";
 
 document.addEventListener('submit', (e) => {
   e.preventDefault();
@@ -8,15 +10,16 @@ document.addEventListener('submit', (e) => {
 });
 
 const openAIApiKey = process.env.OPENAI_API_KEY;
+
 const llm = new ChatOpenAI({ openAIApiKey });
 
 const standAloneQuestionTemplate = 'Given a question, convert it into a standalone question.question: {question} standalone question:';
 
 const standAloneQuestionPrompt = PromptTemplate.fromTemplate(standAloneQuestionTemplate);
 
-const standAloneQuestionChain = standAloneQuestionPrompt.pipe(llm);
+const chain = standAloneQuestionPrompt.pipe(llm).pipe(new StringOutputParser()).pipe(retriever)
 
-const response = await standAloneQuestionChain.invoke({
+const response = await chain.invoke({
   question: 'What are the technical requirements for running scrimba? I have a very old laptop which is not that powerful.'
 })
 
