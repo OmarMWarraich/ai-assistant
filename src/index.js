@@ -1,7 +1,9 @@
 import { ChatOpenAI } from "langchain/chat_models/openai"
 import { PromptTemplate } from "langchain/prompts" 
 import { StringOutputParser } from "langchain/schema/output_parser"
-import { retriever } from "../utils/retriever";
+import { retriever } from "../utils/retriever"
+import { combineDocuments } from "../utils/combineDocuments"
+import { RunnablePassthrough, RunnableSequence } from "langchain/schema/runnable"
 
 document.addEventListener('submit', (e) => {
   e.preventDefault();
@@ -15,9 +17,41 @@ const llm = new ChatOpenAI({ openAIApiKey });
 
 const standAloneQuestionTemplate = 'Given a question, convert it into a standalone question.question: {question} standalone question:';
 
-const standAloneQuestionPrompt = PromptTemplate.fromTemplate(standAloneQuestionTemplate);
+const standaloneQuestionPrompt = PromptTemplate.fromTemplate(standAloneQuestionTemplate);
 
-const chain = standAloneQuestionPrompt.pipe(llm).pipe(new StringOutputParser()).pipe(retriever)
+const answerTemplate = `You are a helpful and enthusiastic support bot who can answer a given question about Scrimba based on the context provided. Try to find the answer in the context. If you really don't know the answer, say "I'm sorry, I don't know the answer to that." And direct the questioner to email help@scrimba.com. Don't try to make up an answer. Always speak as if you were chatting to a friend.
+context: {context}
+question: {question}
+answer: 
+`
+
+const answerPrompt = PromptTemplate.fromTemplate(answerTemplate)
+
+const standaloneQuestionChain = standaloneQuestionPrompt
+    .pipe(llm)
+    .pipe(new StringOutputParser())
+
+const retrieverChain = RunnableSequence.from([
+    prevResult => prevResult.standalone_question,
+    retriever,
+    combineDocuments,
+])
+const answerChain = answerPrompt
+    .pipe(llm)
+    .pipe(new StringOutputParser())
+
+const chain = RunnableSequence.from([
+  {
+    standalone_question: standaloneQuestionChain,
+    original_input: new RunnablePassthrough(),
+  },
+  {
+    context: retrieverChain,
+    question: ({ original_input }) => original_input.question,
+  },
+  answerChain,
+]) 
+
 
 const response = await chain.invoke({
   question: 'What are the technical requirements for running scrimba? I have a very old laptop which is not that powerful.'
